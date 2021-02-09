@@ -29,23 +29,29 @@ config.vm.network "forwarded_port", guest: 80, host: 8080
 ```
 config.vm.network "private_network", ip: "192.168.33.10"
 ``` 
-1行目ではポートフォワーディングの設定を行っています。
+1行目では**ポートフォワーディング**の設定を行っています。
 ゲストOSの80番ポートの通信をホストOSの8080番ポートへ転送する設定です。
-2行目ではシステム内部での通信であるプライベートネットワークの設定を記述します。
+2行目ではシステム内部での通信である**プライベートネットワーク**の設定を記述します。
 <br>
 
 今回使用するipは192.168.33.19であるため、２箇所目のコメントアウトを修正
+
 ```
 config.vm.network "private_network", ip: "192.168.33.19"
 ```
+
 <br>
+
 ```
 config.vm.synced_folder "../data", "/vagrant_data"
 ```
+
 以下に変更
+
 ```
 config.vm.synced_folder "./", "/vagrant", type:"virtualbox"
 ```
+
 ホストOSのディレクトリとゲストOSの/vagrantのディレクトリをリアルタイムで同期するための記述になります。
 "./"はカレントディレクトリであるvirtual_env_manualにあたります。
 
@@ -90,8 +96,10 @@ To fix this, modify your current project's Vagrantfile to use another
 port. Example, where '1234' would be replaced by a unique host port:
 ```
 8080ポートが既に使用されているとの内容
+
 <br>
-コマンドでポートを確認
+
+以下コマンドでポートを確認
 ```
 $ lsof -i:8080 
 COMMAND     PID    USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
@@ -104,13 +112,14 @@ com.docke 46735 asairyo   98u  IPv6 0x1781a46d18b75b79      0t0  TCP *:http-alt 
 $ vagrant upでゲストOSを起動
 [default] No Virtualbox Guest Additions installation found.
 ```
-    
-ちなみに以下のコマンドでvagrantのシャットダウンを行うことができます。
+
 <br>
-シャットダウン後はvagrant upでゲストOSの立ち上げができます。
-```
-$ vagrant halt
-```
+
+ちなみに`vagrant halt`コマンドでvagrantのシャットダウンを行うことができます。
+
+<br>
+
+シャットダウン後は`vagrant up`でゲストOSの立ち上げましょう。
 
 <br>
 
@@ -140,8 +149,22 @@ umount: /mnt: not mounted
 ```
 $ vagrant vbguest --status
 [default] No Virtualbox Guest Additions installation found.
+
 ```
-カーネルのアップデートを行います。
+
+<br>
+
+原因としては
+
+>インストールされているカーネルのバージョンと、一致する kernel-devel パッケージがリポジトリから取得できなくなってしまった。
+
+>vbguest を使用しているため VirtualBox Guest Additions の更新で 該当するバージョンの kernel-devel を取得できずに失敗している。
+
+[# Vagrant + VirtualBOx で 最新のCentOS7 vbox(centos/7 2004.01)でマウントできない問題](https://qiita.com/mao172/items/f1af5bedd0e9536169ae)より引用
+
+<br>
+
+カーネルのアップデートを行い、該当するバージョンの`kernel-devel`を取得できるようにしましょう。
 ```
 $ vagrant ssh
 ```
@@ -285,6 +308,8 @@ phpのインストールが完了しました。
 mysql  Ver 14.14 Distrib 5.7.33, for Linux (x86_64) using  EditLine wrapper
 ```
 無事インストールできました。
+
+<br>
     
 #### MySQLを起動し、接続を行います。
 ```
@@ -362,9 +387,10 @@ nginx version: nginx/1.19.6
 ```
 上記コマンド起動を確認します。
 問題なく起動できているのが確認できます。
+
 <br>
-192.168.33.19へアクセスすると
-Welcome to nginx!の画面が表示されます。
+
+192.168.33.19へアクセスすると`Welcome to nginx!`の画面が表示されます。
 
 <br>
 
@@ -419,19 +445,19 @@ MySQLにログインし、テーブルが作成されていれば完了です。
 Illuminate\Database\QueryException  : SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 767 bytes (SQL: alter table `users` add unique `users_email_unique`(`email`))
 ```
 
-原因はLaravel5.4から標準charasetがutf8mb4に変わったことで一文字数のByte数が4byteに増えたことです。
+原因はLaravel5.4から標準`charaset`が`utf8mb4`に変わったことで一文字数の`Byte数`が`4byte`に増えたことです。
 
-マイグレーションファイルのVarcharカラムは大きさを指定しなかった場合に、Varchar(255)のカラムが作成されます。
-
-<br>
-
-MySQL5.7以前のバージョンでは PRIMARY_KEYとUNIQUE_KEYをつけたカラムは最大767Byteしか入りません。
-
-4Byte 255文字では767Byteを超えてしまうためこのようなエラーが発生します。
+マイグレーションファイルの`Varchar`カラムは大きさを指定しなかった場合に、`Varchar(255)`のカラムが作成されます。
 
 <br>
 
-対策としてはMySQLのバージョンを最新にする、Charasetを変更する方法がありますが、今回はカラムの最大長を変更し、767Byte以上の文字列が入らないようにします。
+MySQL5.7以前のバージョンでは `PRIMARY_KEY`と`UNIQUE_KEY`をつけたカラムは`最大767Byte`しか入りません。
+
+4Byte 255文字では`767Byte`を超えてしまうためこのようなエラーが発生します。
+
+<br>
+
+対策としてはMySQLのバージョンを最新にする、`Charaset`を変更する方法がありますが、今回はカラムの最大長を変更し、`767Byte`以上の文字列が入らないようにします。
 
 <br>
 
@@ -453,8 +479,11 @@ public function boot()
 
 laravel 6.0からは`php artisan make:auth`でログイン機能の作成ができません。
     
-laravel/uiとして機能が分離した
+laravel/uiとして機能が分離したためです。以下のコマンドを実行しましょう。
+
+```
 $ composer require laravel/ui "1.x" --dev
+```
 
 `Package manifest generated successfully.`と表示されれば完了です。
 <br>
@@ -507,10 +536,14 @@ npm install --save-dev axios@0.21.1
 npm run dev
 ```
 開発用にビルドします。
+
 <br>
+
 問題なくLaravelの認証機能の作成ができました。
+
 <br>
-以下のコマンドで一度にインストールと開発用ビルドを行うこともできます。
+
+ちなみに以下のコマンドで一度にインストールと開発用ビルドを行うこともできます。
 ```
 npm install && nup run dev
 ```
@@ -536,6 +569,8 @@ create database laravel_test
 php artisan migrate
 ```
 テーブルが作成されていれば完了です。
+
+<br>
 
 ### Nginxの設定
 ```
@@ -599,16 +634,42 @@ Nginxを起動します。
 
 <br>
 
+起動後、以下コマンドで状態を確認できます。
+```
+sudo systemctl status nginx
+```
+
+<br>
+
+```
+● nginx.service - nginx - high performance web server
+   Loaded: loaded (/usr/lib/systemd/system/nginx.service; disabled; vendor preset: disabled)
+   Active: active (running) since Tue 2021-02-09 08:46:57 UTC; 54min ago
+     Docs: http://nginx.org/en/docs/
+  Process: 2558 ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf (code=exited, status=0/SUCCESS)
+ Main PID: 2559 (nginx)
+   CGroup: /system.slice/nginx.service
+           ├─2559 nginx: master process /usr/sbin/nginx -c /etc/nginx/nginx.conf
+           └─2560 nginx: worker process
+```
+
+<br>
+
+正常に起動できました。
+
+<br>
+
 #### エラー発生。
+エラーが発生し、nginxの起動に失敗しました。
+
 ```
 Job for nginx.service failed because the control process exited with error code. See "systemctl status nginx.service" and "journalctl -xe" for details.
 ```
-nginxの起動に失敗しました。
 
+以下のコマンドでエラー内容を確認しましょう。
 ```
 [vagrant@localhost ~]$ sudo nginx -t
 ```
-エラー内容が表示されます。
 
 ```
 nginx: [emerg] unexpected "}" in /etc/nginx/conf.d/default.conf:14
@@ -622,29 +683,44 @@ try_files $uri $uri/ /index.php$is_args$args
 ```
 try_files $uri $uri/ /index.php$is_args$args;
 ```
+
+正常に起動できるはずです。
+
+
 <br>
 
 ### Nginxでphpアプリケーションを動かすにはphp-fpmという拡張モジュールの設定が必要です。
 <br>
 Nginxはこのphp-fpmとセットで動作するためです。
+
 <br>
+
 php-fpmの設定ファイルを編集します。
+
 ```
 [vagrant@localhost ~]$ sudo vi /etc/php-fpm.d/www.conf
 ```
+
 24行目
+
 ```
 user = apache
 ```
+
 以下に編集
+
 ```
 user = nginx
 ```
+
 26行目
+
 ```
 group = apache
 ```
+
 以下に編集
+
 ```
 group = nginx
 ```
@@ -682,18 +758,29 @@ SELINUX=enforcing
 ```
 SELINUX=disabled
 ```
-192.168.33.19へアクセス
+
+修正後は`exit`でホストOSへ戻り、Vagrantを再起動しましょう。
+
+`getenforce`コマンドで出力される値が、`disabled`に変更されているはずです。
+
 <br>
-エラーが発生してしまいました。
+
+192.168.33.19へアクセス
+
+<br>
+
+#### エラーが発生
 ```
 The stream or file "/vagrant/laravel_test/storage/logs/laravel.log" could not be opened in append mode: failed to open stream: Permission denied
 ```
 ```
-[vagrant@localhost ~]$ sudo vi /etc/php-fpm.d/www.confで
+[vagrant@localhost ~]$ sudo vi /etc/php-fpm.d/www.conf
 ```
-php-fpmの設定ファイルのuser, groupの箇所をnginxに変更しましたが、ファイルとディレクトリの実行userとgroupにnginxが許可されていないため、エラーが起きてしまいます。
+先ほどのコマンドで`php-fpm`の設定ファイルの`user`, `group`の箇所を`nginx`に変更しましたが、ファイルとディレクトリの実行`user`と`group`に`nginx`が許可されていないため、エラーが起きてしまいます。
 
-ゲストOS内のlaravel_testディレクトリ内で以下のコマンドを実行します。
+<br>
+
+ゲストOS内の`laravel_test`ディレクトリ内で以下のコマンドを実行します。
 ```
 [vagrant@localhost laravel_test]$ ls -la  | grep storage && ls -la storage/ | grep logs && ls -la storage/logs/ | grep laravel.log
 drwxr-xr-x. 1 vagrant vagrant    160 Feb  6 01:50 storage
@@ -706,6 +793,13 @@ drwxr-xr-x. 1 vagrant vagrant 128 Feb  5 16:32 logs
 ```
 [vagrant@localhost ~]$ sudo chmod -R 777 storage
 ```
+
+<br>
+
+権限を確認します。
+
+<br>
+
 ```
 [vagrant@localhost laravel_test]$ ls -la  | grep storage && ls -la storage/ | grep logs && ls -la storage/logs/ | grep laravel.log
 drwxrwxrwx. 1 vagrant vagrant    160 Feb  6 01:50 storage
@@ -715,6 +809,8 @@ drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 
 再びhttp://192.168.33.19へアクセスします。
 問題なくlaravelの画面が表示されます。
+
+<br>
 
 ### 新規登録時にエラー発生
 ```
@@ -739,15 +835,15 @@ config.vm.synced_folder "./", "/vagrant", type:"virtualbox", mount_options: ['dm
 
 <br>
 
-第一引数で、ホストディレクトリの指定 
-第二引数で、ゲストディレクトリの指定 
-第三引数で、オプションの指定 
+第一引数で、ホストディレクトリの指定  
+第二引数で、ゲストディレクトリの指定  
+第三引数で、オプションの指定  
 
 <br>
 
 今回は`mount_options`で配列でオプションの指定を行います。
-`dmode`でディレクトリのパーミッション変更 
-`fmode`でファイルのパーミッション変更
+`dmode`でディレクトリのパーミッション変更  
+`fmode`でファイルのパーミッション変更  
 
 内容を記述後、Vagrantを再起動することでパーミッションの変更が反映されます。
 <br>
@@ -764,6 +860,16 @@ config.vm.synced_folder "./", "/vagrant", type:"virtualbox", mount_options: ['dm
 [OSコマンドインジェクションの仕組みとその対策](https://www.shadan-kun.com/blog/measure/2873/)より引用
 
 全てのファイルに書き込み権限があるので、悪意のある第三者にファイルの中身を変えられるリスクがあるというわけです。
+
+<br>
+
+`mount_options`設定後は問題なく新規登録、ログイン、ログアウトが実行できるようになります。
+
+<br>
+
+#### 備考
+`umask`コマンドを用いて生成されるファイル（ここではsession）にパーミッションを指定する方法など、よりセキュリティリスクの低い方法もあるかもしれません。
+
 
 <br>
 
@@ -785,7 +891,7 @@ config.vm.synced_folder "./", "/vagrant", type:"virtualbox", mount_options: ['dm
 [OSコマンドインジェクションの仕組みとその対策](https://www.shadan-kun.com/blog/measure/2873/)
 
 
-
+<!-- 
 ゲストOS ホストで共有
 Permission変更はよろしくない
 
@@ -798,4 +904,4 @@ Linux的に脆弱的によろしくない
 セキュリティ　ファイルが書き換えられる
 コマンド流し込める osコマンドインジェクション 書き換えられてしまう
 storage sessionsは
-設定ファイルを書き換えられると危険　リスクとして存在。
+設定ファイルを書き換えられると危険　リスクとして存在。 -->
