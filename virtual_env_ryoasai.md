@@ -43,6 +43,7 @@ config.vm.network "private_network", ip: "192.168.33.10"
 ```
 config.vm.network "private_network", ip: "192.168.33.19"
 ```
+<br>
 ```
 config.vm.synced_folder "../data", "/vagrant_data"
 ```
@@ -78,47 +79,6 @@ vagrant-vbguest (0.29.0, global)
 
 <br>
 
-### sahara 
-せっかくなのでpluginの項目でインストールしたsaharaを使ってみましょう
-
-まずは状態を確認
-ホストOSで
-```
-$ vagrant sandbox status
-[default] Sandbox mode is off
-```
-Sandboxがoffになっていては使えないのでonで有効化しましょう
-<br>
-```
-$ vagrant sandbox on
-```
-```
-$ vagrant sandbox status
-[default] Sandbox mode is on
-```
-有効化されました。
-もう一度offにしたい場合は以下コマンドで無効化できます。
-
-```
-$ vagrant sandbox off
-```
-現時点での環境構築を保存し、いつでも元に戻せるようにサンドボックスをコミットします。
-```
-$ vagrant sandbox commit
-[default] Committing the virtual machine...
-0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
-0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
-```
-これでコミット完了です。
-```
-vagrant sandbox rollback
-```
-上のコマンドを使えばいつでも元の状態に戻すことができます。
-    
-参考https://qiita.com/sudachi808/items/09cbd3dd1f5c25c23ea
-
-<br>
-
 ### vagrantを使用し、ゲストOSを起動します。
 ```
 $ vagrant up
@@ -144,7 +104,7 @@ com.docke 46735 asairyo   98u  IPv6 0x1781a46d18b75b79      0t0  TCP *:http-alt 
 ```
 `kill 46735`を使用し、強制終了。
 <br>
-参考記事 https://qiita.com/tiruka/items/e0a03cbd71b842fef57e
+<!-- 参考記事 https://qiita.com/tiruka/items/e0a03cbd71b842fef57e -->
 ```
 $ vagrant upでゲストOSを起動
 [default] No Virtualbox Guest Additions installation found.
@@ -156,7 +116,7 @@ $ vagrant upでゲストOSを起動
 ```
 $ vagrant halt
 ```
-参照https://qiita.com/htk_jp/items/929875eaa5afc71c25ed
+<!-- 参照https://qiita.com/htk_jp/items/929875eaa5afc71c25ed -->
 
 
 <br>
@@ -211,7 +171,7 @@ $ vagrant vbguest --status
 ```
 インストールが完了し、動作も問題ないようです。
 
-参照 https://qiita.com/mao172/items/f1af5bedd0e9536169ae
+<!-- 参照 https://qiita.com/mao172/items/f1af5bedd0e9536169ae -->
 
 <br>
 
@@ -222,6 +182,47 @@ $ vagrant ssh
 [vagrant@localhost ~]$  
 ```
 ログインに成功しました。
+
+<br>
+
+### sahara 
+せっかくなのでpluginの項目でインストールしたsaharaを使ってみましょう
+
+まずは状態を確認
+ホストOSで
+```
+$ vagrant sandbox status
+[default] Sandbox mode is off
+```
+Sandboxがoffになっていては使えないのでonで有効化しましょう
+<br>
+```
+$ vagrant sandbox on
+```
+```
+$ vagrant sandbox status
+[default] Sandbox mode is on
+```
+有効化されました。
+もう一度offにしたい場合は以下コマンドで無効化できます。
+
+```
+$ vagrant sandbox off
+```
+現時点での環境構築を保存し、いつでも元に戻せるようにサンドボックスをコミットします。
+```
+$ vagrant sandbox commit
+[default] Committing the virtual machine...
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+```
+これでコミット完了です。
+```
+vagrant sandbox rollback
+```
+上のコマンドを使えばいつでも元の状態に戻すことができます。
+    
+<!-- 参考https://qiita.com/sudachi808/items/09cbd3dd1f5c25c23ea -->
 
 <br>
 
@@ -271,7 +272,7 @@ Zend Engine v3.3.26, Copyright (c) 1998-2018 Zend Technologies
 <br>
 phpのインストールが完了しました。
 <br>
-参考 https://qiita.com/okdyy75/items/d3492e4ea7136d3b6ffc
+<!-- 参考 https://qiita.com/okdyy75/items/d3492e4ea7136d3b6ffc -->
 
 <br>
 
@@ -338,7 +339,7 @@ mysql > set password = "新たなpassword";
 datadir=/var/lib/mysql
 socket=/var/lib/mysql/mysql.sock
 #この1行を追記
-validate-password=OFF
+
 ```
 編集後にMySQLの再起動を行います。
 ```
@@ -435,6 +436,44 @@ MySQLにログインし、テーブルが作成されていれば完了です。
 
 <br>
 
+### エラー発生
+
+```
+Illuminate\Database\QueryException  : SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 767 bytes (SQL: alter table `users` add unique `users_email_unique`(`email`))
+```
+
+原因はLaravel5.4から標準charasetがutf8mb4に変わったことで一文字数のByte数が4byteに増えたことです。
+
+マイグレーションファイルのVarcharカラムは大きさを指定しなかった場合に、Varchar(255)のカラムが作成されます。
+
+<br>
+
+MySQL5.7以前のバージョンでは PRIMARY_KEYとUNIQUE_KEYをつけたカラムは最大767Byteしか入りません。
+
+4Byte 255文字では767Byteを超えてしまうためこのようなエラーが発生します。
+
+<br>
+
+対策としてはMySQLのバージョンを最新にする、Charasetを変更する方法がありますが、今回はカラムの最大長を変更し、767Byte以上の文字列が入らないようにします。
+
+<br>
+
+`laravel_test/app/Providers/AppServiceProvider.php`内に以下を追記します。
+
+```
+use Illuminate\Support\Facades\Schema;
+
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+```
+この状態でマイグレーション実行すると正常に動作が完了します。
+
+<!-- 参考　https://qiita.com/beer_geek/items/6e4264db142745ea666f -->
+
+<br>
+
 ## laravel authの作成
 
 laravel 6.0からは`php artisan make:auth`でログイン機能の作成ができません。
@@ -464,6 +503,18 @@ npm install --save-dev @fortawesome/fontawesome-free -->
 ```
 npm install
 ```
+
+<!-- ```
+composer require laravel/ui "^1.0" --dev
+```
+```
+php artisan ui vue --auth
+```
+```
+Please run "npm install && npm run dev" to compile your fresh scaffolding.
+``` -->
+
+<br>
 
 #### 以下のメッセージが表示された場合
 ```
@@ -518,7 +569,7 @@ npm run dev
 ```
 npm install && nup run dev
 ```
-参照 https://www.techpit.jp/courses/42/curriculums/45/sections/362/parts/1144
+<!-- 参照 https://www.techpit.jp/courses/42/curriculums/45/sections/362/parts/1144 -->
 
     
 <br>
@@ -597,6 +648,13 @@ server {
 }
 ```
 
+```
+[vagrant@localhost ~]$ sudo systemctl start nginx 
+```
+Nginxを起動します。
+
+<br>
+
 #### エラー発生。
 ```
 Job for nginx.service failed because the control process exited with error code. See "systemctl status nginx.service" and "journalctl -xe" for details.
@@ -620,7 +678,9 @@ try_files $uri $uri/ /index.php$is_args$args
 ```
 try_files $uri $uri/ /index.php$is_args$args;
 ```
-Nginxでphpアプリケーションを動かすにはphp-fpmという拡張モジュールの設定が必要です。
+<br>
+
+### Nginxでphpアプリケーションを動かすにはphp-fpmという拡張モジュールの設定が必要です。
 <br>
 Nginxはこのphp-fpmとセットで動作するためです。
 <br>
@@ -644,11 +704,11 @@ group = apache
 ```
 group = nginx
 ```
-```
+<!-- ```
 [vagrant@localhost ~]$ sudo systemctl start nginx
 [vagrant@localhost ~]$ sudo systemctl restart nginx
 [vagrant@localhost ~]$ sudo systemctl start php-fpm
-```
+``` -->
 
 
 nginxとphp-fpmを再起動しましょう
@@ -716,3 +776,17 @@ drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 
 再びhttp://192.168.33.19へアクセスします。
 問題なくlaravelの画面が表示されます。
+
+
+参考記事
+[Vagrantのおけるポートフォワーディングではまった](https://qiita.com/tiruka/items/e0a03cbd71b842fef57e)
+
+[vagrant コマンド（起動・再起動・シャットダウン等々）備忘録](https://qiita.com/htk_jp/items/929875eaa5afc71c25ed)
+
+[# Vagrant + VirtualBOx で 最新のCentOS7 vbox(centos/7 2004.01)でマウントできない問題](https://qiita.com/mao172/items/f1af5bedd0e9536169ae)
+
+[VagrantでCentOS7+Apache2.4+PHP7.3+Laravel5.7環境構築](https://qiita.com/okdyy75/items/d3492e4ea7136d3b6ffc)
+
+[Laravel/ui Bootstrapの導入](https://www.techpit.jp/courses/42/curriculums/45/sections/362/parts/1144)
+
+[Laravel5.4以上、MySQL5.7.7未満 でusersテーブルのマイグレーションを実行すると Syntax error が発生する](https://qiita.com/beer_geek/items/6e4264db142745ea666f)
