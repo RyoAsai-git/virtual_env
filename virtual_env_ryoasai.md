@@ -716,6 +716,55 @@ drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 再びhttp://192.168.33.19へアクセスします。
 問題なくlaravelの画面が表示されます。
 
+### 新規登録時にエラー発生
+```
+file_put_contents(/vagrant/laravel_test/storage/framework/sessions/m78S4CXVXUWldwtuArvFGaQ0RHbP44az7h4JXJq7): failed to open stream: Permission denied
+```
+
+以下のコマンドを実行し、権限を変更します。
+
+```
+chmod 777 /vagrant/laravel_test/storage/framework/sessions/m78S4CXVXUWldwtuArvFGaQ0RHbP44az7h4JXJq7
+```
+
+権限を変更し、新規登録は行えますが、ログアウト時に同様の権限エラーが発生してしまいます。
+
+`Vagrantfile`を修正
+
+```
+config.vm.synced_folder "./", "/vagrant", type:"virtualbox", mount_options: ['dmode=777', 'fmode=777']
+```
+
+`config.vm.synced_folder`ホストとゲスト間でディレクトリを共有できるようにすることができるメソッドです。
+
+<br>
+
+第一引数で、ホストディレクトリの指定 
+第二引数で、ゲストディレクトリの指定 
+第三引数で、オプションの指定 
+
+<br>
+
+今回は`mount_options`で配列でオプションの指定を行います。
+`dmode`でディレクトリのパーミッション変更 
+`fmode`でファイルのパーミッション変更
+
+内容を記述後、Vagrantを再起動することでパーミッションの変更が反映されます。
+<br>
+新規登録ができました。
+
+<br>
+
+この方法は*OSコマンドインジェクション*のリスクがあります。
+
+>OSコマンドインジェクションは、ユーザーからデータや数値の入力を受け付けるようなWebサイトなどにおいて、プログラムに与えるパラメータにOSへの命令文を紛れ込ませて不正に操作する攻撃です。
+>本来想定されていない命令文を強制的に実行させてしまいます。
+>主にWebアプリケーションがWebサーバのシェルを呼び出してコマンドを実行する動作が狙われます。
+
+[OSコマンドインジェクションの仕組みとその対策](https://www.shadan-kun.com/blog/measure/2873/)より引用
+
+全てのファイルに書き込み権限があるので、悪意のある第三者にファイルの中身を変えられるリスクがあるというわけです。
+
 <br>
 
 ### 参考記事
@@ -731,3 +780,22 @@ drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 
 [Laravel5.4以上、MySQL5.7.7未満 でusersテーブルのマイグレーションを実行すると Syntax error が発生する](https://qiita.com/beer_geek/items/6e4264db142745ea666f)
 
+[vagrantの共有フォルダ内のファイルにchmodが効かない場合](https://qiita.com/tatsuo-iriyama/items/4e62180ba453d475d258)
+
+[OSコマンドインジェクションの仕組みとその対策](https://www.shadan-kun.com/blog/measure/2873/)
+
+
+
+ゲストOS ホストで共有
+Permission変更はよろしくない
+
+mount_options: ['dmode=777', 'fmode=777']
+
+dmode　ディレクトリ作成権限
+fmode　ファイル作成権限
+
+Linux的に脆弱的によろしくない
+セキュリティ　ファイルが書き換えられる
+コマンド流し込める osコマンドインジェクション 書き換えられてしまう
+storage sessionsは
+設定ファイルを書き換えられると危険　リスクとして存在。
