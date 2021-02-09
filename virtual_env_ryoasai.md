@@ -131,7 +131,6 @@ umount /mnt
 
 Stdout from the command:
 
-
 Stderr from the command:
 
 umount: /mnt: not mounted
@@ -731,3 +730,4 @@ drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 [Laravel/ui Bootstrapの導入](https://www.techpit.jp/courses/42/curriculums/45/sections/362/parts/1144)
 
 [Laravel5.4以上、MySQL5.7.7未満 でusersテーブルのマイグレーションを実行すると Syntax error が発生する](https://qiita.com/beer_geek/items/6e4264db142745ea666f)
+
