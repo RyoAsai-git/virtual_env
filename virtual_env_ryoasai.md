@@ -1,4 +1,6 @@
+# 環境構築手順書
 # Vagrant + CentOS + Nginx + Laravel + PHP + MySQL環境構築
+
 
 | 使用技術    | バージョン    |
 |:-----------|------------:|
@@ -14,7 +16,7 @@
 
 ## Vagrant仮想環境構築
 
-```
+```console
 $ vagrant init centos/7
 ```
 
@@ -23,10 +25,10 @@ centos/7のboxを指定し、vagrantを初期化
 
 ### Vagrantfileの編集を行います。
 以下2行をコメントアウト
-```
+```Vagrantfile
 config.vm.network "forwarded_port", guest: 80, host: 8080
 ```
-```
+```Vagrantfile
 config.vm.network "private_network", ip: "192.168.33.10"
 ``` 
 1行目では**ポートフォワーディング**の設定を行っています。
@@ -36,19 +38,19 @@ config.vm.network "private_network", ip: "192.168.33.10"
 
 今回使用するipは192.168.33.19であるため、２箇所目のコメントアウトを修正
 
-```
+```Vagrantfile
 config.vm.network "private_network", ip: "192.168.33.19"
 ```
 
 <br>
 
-```
+```Vagrantfile
 config.vm.synced_folder "../data", "/vagrant_data"
 ```
 
 以下に変更
 
-```
+```Vagrantfile
 config.vm.synced_folder "./", "/vagrant", type:"virtualbox"
 ```
 
@@ -64,15 +66,15 @@ config.vm.synced_folder "./", "/vagrant", type:"virtualbox"
 &emsp; GuestAdditionsのバージョンをvirtualBoxに合わせ最新化してくれるプラグイン。
 #### sahara 
 &emsp; 環境構築中のゲストOSの状態をサンドボックスという形で保存ができ、適宜巻き戻しができる。
-```
+```console
 $ vagrant plugin install vagrant-vbguest
 $ vagrant plugin sahara
 ```
-```
+```console
 $ vagrant plugin list
 ```
 プラグインがインストールされているか確認します。
-```
+```console
 sahara (0.0.17, global)
 vagrant-vbguest (0.29.0, global)
 ```
@@ -81,12 +83,12 @@ vagrant-vbguest (0.29.0, global)
 <br>
 
 ### vagrantを使用し、ゲストOSを起動します。
-```
+```console
 $ vagrant up
 ```
 
 #### エラー発生
-```
+```sh
 Vagrant cannot forward the specified ports on this VM, since they
 would collide with some other application that is already listening
 on these ports. The forwarded port to 8080 is already in use
@@ -100,7 +102,7 @@ port. Example, where '1234' would be replaced by a unique host port:
 <br>
 
 以下コマンドでポートを確認
-```
+```console
 $ lsof -i:8080 
 COMMAND     PID    USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
 com.docke 46735 asairyo   98u  IPv6 0x1781a46d18b75b79      0t0  TCP *:http-alt (LISTEN)
@@ -108,7 +110,7 @@ com.docke 46735 asairyo   98u  IPv6 0x1781a46d18b75b79      0t0  TCP *:http-alt 
 `kill 46735`を使用し、強制終了。
 <br>
 
-```
+```console
 $ vagrant upでゲストOSを起動
 [default] No Virtualbox Guest Additions installation found.
 ```
@@ -124,7 +126,7 @@ $ vagrant upでゲストOSを起動
 <br>
 
 #### エラー発生
-```
+```console
 ==> default: Checking for guest additions in VM...
 default: No guest additions were detected on the base box for this VM! Guest
 default: additions are required for forwarded ports, shared folders, host only
@@ -146,7 +148,7 @@ umount: /mnt: not mounted
 ```
 
 エラー内容から`GuestAddition`がインストールされていないようなので、コマンドで確認します。
-```
+```console
 $ vagrant vbguest --status
 [default] No Virtualbox Guest Additions installation found.
 ```
@@ -168,22 +170,22 @@ $ vagrant vbguest --status
 <br>
 
 カーネルのアップデートを行い、該当するバージョンの`kernel-devel`を取得できるようにしましょう。
-```
+```console
 $ vagrant ssh
 ```
 ゲストOSにログイン後以下のコマンドでアップデートを行います。
-```
+```console
 $ sudo yum -y install kernel
 ```
-```
+```console
 $ exit;
 ```
 ゲストOSからログアウトし、Vagrantの再起動を行います。
-```
+```console
 $ vagrant reload --provision
 ```
 
-```
+```console
 $ vagrant vbguest --status
 [default] GuestAdditions 6.0.14 running --- OK.
 ```
@@ -193,7 +195,7 @@ $ vagrant vbguest --status
 
 ### ゲストOSが起動されるとログインが可能になります。
 sshコマンドでログイン。
-```
+```console
 $ vagrant ssh
 [vagrant@localhost ~]$  
 ```
@@ -206,7 +208,7 @@ $ vagrant ssh
 
 まずは状態を確認
 ホストOSで
-```
+```console
 $ vagrant sandbox status
 [default] Sandbox mode is off
 ```
@@ -214,24 +216,24 @@ $ vagrant sandbox status
 <br>
 
 Sandboxがoffになっていては使えないのでonで有効化しましょう
-```
+```console
 $ vagrant sandbox on
 ```
-```
+```console
 $ vagrant sandbox status
 [default] Sandbox mode is on
 ```
 有効化されました。
 もう一度offにしたい場合は以下コマンドで無効化できます。
 
-```
+```console
 $ vagrant sandbox off
 ```
 
 <br>
 
 現時点での環境構築を保存し、いつでも元に戻せるようにサンドボックスをコミットします。
-```
+```console
 $ vagrant sandbox commit
 [default] Committing the virtual machine...
 0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
@@ -248,7 +250,7 @@ $ vagrant sandbox commit
 ## パッケージのインストール
 ### 開発ツールのインストール
 ゲストOS内部に開発に必要なパッケージを一括でインストールします。
-```
+```console
 [vagrant@localhost ~]$ sudo yum -y groupinstall "development tools"
 ```
 
@@ -270,7 +272,7 @@ $ vagrant sandbox commit
 ### PHPのインストール
 
 php本体 関連モジュールをインストールします。
-```
+```console
 [vagrant@localhost ~]$ sudo yum -y install epel-release wget
 [vagrant@localhost ~]$ sudo wget http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 [vagrant@localhost ~]$ sudo rpm -Uvh remi-release-7.rpm
@@ -280,7 +282,7 @@ php本体 関連モジュールをインストールします。
 <br>
 
 コマンドを実行し、インストールができたか確認しましょう。
-```
+```console
 [vagrant@localhost ~]$ php -v
 PHP 7.3.26 (cli) (built: Jan  5 2021 10:36:07) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
@@ -291,7 +293,7 @@ phpのインストールが完了しました。
 <br>
 
 ### Composerのインストール
-```
+```console
 [vagrant@localhost ~]$ php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 [vagrant@localhost ~]$ php composer-setup.php
 [vagrant@localhost ~]$ php -r "unlink('composer-setup.php');"
@@ -312,7 +314,7 @@ phpのインストールが完了しました。
 <br>
 
 ### MySQLのインストール
-```
+```console
 [vagrant@localhost ~]$ sudo wget https://dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm
 [vagrant@localhost ~]$ sudo rpm -Uvh mysql57-community-release-el7-7.noarch.rpm
 [vagrant@localhost ~]$ sudo yum install -y mysql-community-server
@@ -326,28 +328,28 @@ mysql  Ver 14.14 Distrib 5.7.33, for Linux (x86_64) using  EditLine wrapper
 <br>
     
 #### MySQLを起動し、接続を行います。
-```
+```console
 [vagrant@localhost ~]$ sudo systemctl start mysqld
 [vagrant@localhost ~]$ mysql -u root -p
 ```
 デフォルトでrootにパスワードが設定されているため、MySQLにアクセスできません。  
 一度パスワードを調べ、接続しパスワードの再設定が必要になります。  
 
-```
+```console
 [vagrant@localhost ~]$ sudo cat /var/log/mysqld.log | grep 'temporary password'
 ```
 コマンド実行後に以下のようにパスワードが表示されます。
-```
+```console
 2021-01-30T13:10:16.851002Z 1 [Note] A temporary password is generated for root@localhost: .iuoCw2fyz?i
 ```
 このパスワードを入力し、MySQLへ接続します。
 以下のコマンドでパスワードの設定が可能です。
-```
+```.mysql
 mysql > set password = "新たなpassword";
 ```
 しかし、MySQL5.7のパスワードポリシーが厳格なこともあり、開発段階では非常に手間です。
 シンプルなパスワードで設定できるよう変更します。
-```
+```console
 [vagrant@localhost ~]$ sudo vi /etc/my.cnf
 ```
 ```
@@ -360,13 +362,13 @@ socket=/var/lib/mysql/mysql.sock
 <br>
 
 編集後にMySQLの再起動を行います。
-```
+```console
 [vagrant@localhost ~]$ sudo systemctl restart mysqld
 ```
 再起動したら先ほどのパスワードを入力し、MySQLにアクセスしましょう
 <br>
 以下のコマンドを実行してパスワードを設定したら完了です。
-```
+```.mysql
  mysql > set password = "新たなpassword";
 ```
 <br>
@@ -374,7 +376,7 @@ socket=/var/lib/mysql/mysql.sock
 ## サーバーのインストール
 ### Nginxのインストール
 ゲストOSにログインし、以下のコマンドを実行します。
-```
+```console
 [vagrant@localhost ~]$ sudo vi /etc/yum.repos.d/nginx.repo
 ```
 ファイルに以下の内容を書き込みます。
@@ -386,7 +388,7 @@ gpgcheck=0
 enabled=1
 ```
 Nginxのインストールを行います。
-```
+```console
 [vagrant@localhost ~]$ sudo yum install -y nginx
 ```
 バージョンを確認しましょう
@@ -398,10 +400,10 @@ nginx version: nginx/1.19.6
 <br>
 
 確認のため、Nginxを起動します。
-```
+```console
 [vagrant@localhost ~]$ sudo systemctl start nginx
 ```
-```
+```console
 [vagrant@localhost ~]$ sudo systemctl status nginx
 ```
 上記コマンド起動を確認します。
@@ -409,19 +411,19 @@ nginx version: nginx/1.19.6
 
 <br>
 
-192.168.33.19へアクセスすると`Welcome to nginx!`の画面が表示されれば設定完了です。
+[192.168.33.19](192.168.33.19)へアクセスすると`Welcome to nginx!`の画面が表示されれば設定完了です。
 
 <br>
 
 ## Laravelプロジェクト作成
 ホストOSでプロジェクトを作成しましょう
-```
+```php
 $ composer create-project --prefer-dist laravel/laravel laravel_test "6.*"
 ```
-```
+```console
 $ cd laravel_test
 ```
-```
+```php
 $ php artisan serve
 ```
 Laravelの画面が表示されれば成功です。
@@ -430,14 +432,14 @@ Laravelの画面が表示されれば成功です。
 
 ### MySQLでデータベースの作成、設定
 LaravelでMySQLを使用するためにデータベースの作成、設定を行います。
-```
+```console
 $ mysql -u root -p
 ```
 MySQLにログインし、以下コマンドを実行し、データベースを作成します。
-```
+```.mysql
 create database laravel_test;
 ```
-```
+```.mysql
 show databases;
 ```
 作成したlaravel_testが表示されれば問題ありません。
@@ -445,7 +447,7 @@ show databases;
 Laravel側でDBを使用するための記述をします。
 <br>
 Laravelに使用するデータベースを教えてあげる必要があるため、laravel_app直下の.envファイルに記述をします。
-```
+```.env
 .env
 DB_DATABASE=laravel_test
 DB_USERNAME=root
@@ -460,7 +462,7 @@ MySQLにログインし、テーブルが作成されていれば完了です。
 
 ### エラー発生
 
-```
+```php
 Illuminate\Database\QueryException  : SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 767 bytes (SQL: alter table `users` add unique `users_email_unique`(`email`))
 ```
 
@@ -482,7 +484,7 @@ MySQL5.7以前のバージョンでは `PRIMARY_KEY`と`UNIQUE_KEY`をつけた�
 
 `laravel_test/app/Providers/AppServiceProvider.php`内に以下を追記します。
 
-```
+```php
 use Illuminate\Support\Facades\Schema;
 
 public function boot()
@@ -500,7 +502,7 @@ laravel 6.0からは`php artisan make:auth`でログイン機能の作成がで�
     
 laravel/uiとして機能が分離したためです。以下のコマンドを実行しましょう。
 
-```
+```php
 $ composer require laravel/ui "1.x" --dev
 ```
 
@@ -508,11 +510,11 @@ $ composer require laravel/ui "1.x" --dev
 <br>
 
 laravel/uiがインストールされた状態で、
-```
+```php
 php artisan ui bootstrap --auth
 ```
 以下のように表示されれば完了です。
-```
+```php
 Bootstrap scaffolding installed successfully.
 Please run "npm install && npm run dev" to compile your fresh scaffolding.
 Authentication scaffolding generated successfully.
@@ -521,14 +523,14 @@ Authentication scaffolding generated successfully.
 `npm install`と`npm run dev`を行うよう書かれているので実行します。
 
 
-```
+```php
 npm install
 ```
 
 <br>
 
 #### 以下のメッセージが表示された場合
-```
+```php
 found 1 high severity vulnerability
     run `npm audit fix` to fix them, or `npm audit` for details
 
@@ -547,11 +549,11 @@ npm audit
 └───────────────┴──────────────────────────────────────────────────────────────┘
 ```
 脆弱性が確認されたとの内容なので、要求されたコマンドを実行し解消させます。
-```
+```php
 npm install --save-dev axios@0.21.1
 ```
 
-```
+```php
 npm run dev
 ```
 開発用にビルドします。
@@ -563,7 +565,7 @@ npm run dev
 <br>
 
 ちなみに以下のコマンドで一度にインストールと開発用ビルドを行うこともできます。
-```
+```php
 npm install && nup run dev
 ```
 
@@ -572,19 +574,19 @@ npm install && nup run dev
 
 ## ゲストOSでLaravelを動かす準備をします。
 ### MySQLでデータベースの作成
-```
+```console
 [vagrant@localhost ~]$ sudo systemctl start mysqld
 ```
 コマンドを実行し、MySQLを起動します。
 <br>
 パスワードを入力し、ログインした後にcreateコマンドを使い、データベースを作成します。
-```
+```.mysql
 create database laravel_test
 ```
 
 `cd`コマンドでLaravel＿testのディレクトリに移動し、以下のコマンドを実行。
 
-```
+```php
 php artisan migrate
 ```
 テーブルが作成されていれば完了です。
@@ -592,11 +594,11 @@ php artisan migrate
 <br>
 
 ### Nginxの設定
-```
+```console
 [vagrant@localhost ~]$ sudo vi /etc/nginx/conf.d/default.conf
 ```
 以下のように修正します。
-```
+```.nginx
 server {
     listen       80;
     server_name  192.168.33.19;
@@ -649,14 +651,14 @@ server {
 <br>
 
 Nginxを起動します。
-```
+```console
 [vagrant@localhost ~]$ sudo systemctl start nginx 
 ```
 
 <br>
 
 起動後、以下コマンドで状態を確認できます。
-```
+```.nginx
 [vagrant@localhost ~]$ sudo systemctl status nginx
 ● nginx.service - nginx - high performance web server
    Loaded: loaded (/usr/lib/systemd/system/nginx.service; disabled; vendor preset: disabled)
@@ -678,7 +680,7 @@ Nginxを起動します。
 #### エラー発生。
 エラーが発生し、nginxの起動に失敗しました。
 
-```
+```.nginx
 Job for nginx.service failed because the control process exited with error code. See "systemctl status nginx.service" and "journalctl -xe" for details.
 ```
 
@@ -687,16 +689,16 @@ Job for nginx.service failed because the control process exited with error code.
 [vagrant@localhost ~]$ sudo nginx -t
 ```
 
-```
+```.nginx
 nginx: [emerg] unexpected "}" in /etc/nginx/conf.d/default.conf:14
 nginx: configuration file /etc/nginx/nginx.conf test failed
 ```
 エラー内容から`/etc/nginx/conf.d/default.conf:`14行目に原因があることがわかりました。
-```
+```.nginx
 try_files $uri $uri/ /index.php$is_args$args
 ```
 `;`がありませんでした。修正しましょう
-```
+```.nginx
 try_files $uri $uri/ /index.php$is_args$args;
 ```
 
@@ -714,7 +716,7 @@ try_files $uri $uri/ /index.php$is_args$args;
 
 **php-fpm**の設定ファイルを編集します。
 
-```
+```console
 [vagrant@localhost ~]$ sudo vi /etc/php-fpm.d/www.conf
 ```
 
@@ -744,21 +746,21 @@ group = nginx
 
 
 nginxとphp-fpmを再起動しましょう
-```
+```console
 [vagrant@localhost ~]$ $ sudo systemctl restart nginx
 [vagrant@localhost ~]$ $ sudo systemctl start php-fpm
 ```
 `403 forbidden`と表示され、画面が表示されません。
-```
+```console
 [vagrant@localhost ~]$ sudo firewall-cmd --add-service=http --zone=public --permanent
 [vagrant@localhost ~]$ sudo firewall-cmd --reload
 [vagrant@localhost ~]$ sudo systemctl restart nginx
 ```
-```
+```console
 [vagrant@localhost ~]$ getenforce
 Enforcing
 ```
-```
+```console
 [vagrant@localhost ~]$ sudo setenforce Permissive
 Permissive
 ```
@@ -767,7 +769,7 @@ Permissive
 <br>
 
 何度も起動時にコマンドでPermissiveにする必要があるので、設定ファイルの内容を書き換えましょう。
-```
+```console
 [vagrant@localhost ~]$ sudo vi /etc/selinux/config
 ```
 ```
@@ -786,15 +788,15 @@ SELINUX=disabled
 
 <br>
 
-192.168.33.19へアクセスできるはずです。
+[192.168.33.19](192.168.33.19)へアクセスできるはずです。
 
 <br>
 
 #### エラーが発生
-```
+```php
 The stream or file "/vagrant/laravel_test/storage/logs/laravel.log" could not be opened in append mode: failed to open stream: Permission denied
 ```
-```
+```console
 [vagrant@localhost ~]$ sudo vi /etc/php-fpm.d/www.conf
 ```
 先ほどのコマンドで`php-fpm`の設定ファイルの`user`, `group`の箇所を`nginx`に変更しましたが、ファイルとディレクトリの実行`user`と`group`に`nginx`が許可されていないため、エラーが起きてしまいます。
@@ -802,7 +804,7 @@ The stream or file "/vagrant/laravel_test/storage/logs/laravel.log" could not be
 <br>
 
 ゲストOS内の`laravel_test`ディレクトリ内で以下のコマンドを実行します。
-```
+```console
 [vagrant@localhost laravel_test]$ ls -la  | grep storage && ls -la storage/ | grep logs && ls -la storage/logs/ | grep laravel.log
 drwxr-xr-x. 1 vagrant vagrant    160 Feb  6 01:50 storage
 drwxr-xr-x. 1 vagrant vagrant 128 Feb  5 16:32 logs
@@ -811,7 +813,7 @@ drwxr-xr-x. 1 vagrant vagrant 128 Feb  5 16:32 logs
 `storage、log`ディレクトリ、`laravel.log`ファイルも`user`が`vagrant`となっていますが、これではユーザー権限を持って`laravel.log`ファイルへの書き込みができません。
 
 `laravel_test`ディレクトリ内で以下のコマンドを実行し、nginxユーザーでも書き込みができるように権限を与えましょう。
-```
+```console
 [vagrant@localhost ~]$ sudo chmod -R 777 storage
 ```
 
@@ -819,34 +821,34 @@ drwxr-xr-x. 1 vagrant vagrant 128 Feb  5 16:32 logs
 
 権限を確認します。
 
-```
+```console
 [vagrant@localhost laravel_test]$ ls -la  | grep storage && ls -la storage/ | grep logs && ls -la storage/logs/ | grep laravel.log
 drwxrwxrwx. 1 vagrant vagrant    160 Feb  6 01:50 storage
 drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 -rwxrwxrwx. 1 vagrant vagrant 17385 Feb  6 11:37 laravel.log
 ```
 
-再びhttp://192.168.33.19へアクセスします。
+再び[192.168.33.19](192.168.33.19)へアクセスします。
 問題なくlaravelの画面が表示されます。
 
 <br>
 
 ### 新規登録時にエラー発生
-```
+```php
 file_put_contents(/vagrant/laravel_test/storage/framework/sessions/m78S4CXVXUWldwtuArvFGaQ0RHbP44az7h4JXJq7): failed to open stream: Permission denied
 ```
 
 以下のコマンドを実行し、権限を変更します。
 
-```
-chmod 777 /vagrant/laravel_test/storage/framework/sessions/m78S4CXVXUWldwtuArvFGaQ0RHbP44az7h4JXJq7
+```console
+[vagrant@localhost laravel_test]$ chmod 777 /vagrant/laravel_test/storage/framework/sessions/m78S4CXVXUWldwtuArvFGaQ0RHbP44az7h4JXJq7
 ```
 
 権限を変更し、新規登録は行えますが、ログアウト時に同様の権限エラーが発生してしまいます。
 
 `Vagrantfile`を修正
 
-```
+```Vagrantfile
 config.vm.synced_folder "./", "/vagrant", type:"virtualbox", mount_options: ['dmode=777', 'fmode=777']
 ```
 
@@ -908,19 +910,3 @@ config.vm.synced_folder "./", "/vagrant", type:"virtualbox", mount_options: ['dm
 [vagrantの共有フォルダ内のファイルにchmodが効かない場合](https://qiita.com/tatsuo-iriyama/items/4e62180ba453d475d258)
 
 [OSコマンドインジェクションの仕組みとその対策](https://www.shadan-kun.com/blog/measure/2873/)
-
-
-<!-- 
-ゲストOS ホストで共有
-Permission変更はよろしくない
-
-mount_options: ['dmode=777', 'fmode=777']
-
-dmode　ディレクトリ作成権限
-fmode　ファイル作成権限
-
-Linux的に脆弱的によろしくない
-セキュリティ　ファイルが書き換えられる
-コマンド流し込める osコマンドインジェクション 書き換えられてしまう
-storage sessionsは
-設定ファイルを書き換えられると危険　リスクとして存在。 -->
