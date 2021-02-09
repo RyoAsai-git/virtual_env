@@ -52,13 +52,13 @@ config.vm.synced_folder "../data", "/vagrant_data"
 config.vm.synced_folder "./", "/vagrant", type:"virtualbox"
 ```
 
-ホストOSのディレクトリとゲストOSの/vagrantのディレクトリをリアルタイムで同期するための記述になります。
-"./"はカレントディレクトリであるvirtual_env_manualにあたります。
+ホストOSのディレクトリとゲストOSの`/vagrant`のディレクトリをリアルタイムで同期するための記述になります。
+`"./"`はカレントディレクトリである`virtual_env_manual`にあたります。
 
 <br>
 
 ### Vagrantプラグインのインストール
-ここではVagrant-vbguestとsaharaというプラグインのインストールを行います。
+ここでは**Vagrant-vbguest**と**sahara**というプラグインのインストールを行います。
 
 #### vagrant-vbguest 
 &emsp; GuestAdditionsのバージョンをvirtualBoxに合わせ最新化してくれるプラグイン。
@@ -145,12 +145,15 @@ Stderr from the command:
 umount: /mnt: not mounted
 ```
 
-エラー内容からGuestAdditionがインストールされていないようなので、コマンドで確認します。
+エラー内容から`GuestAddition`がインストールされていないようなので、コマンドで確認します。
 ```
 $ vagrant vbguest --status
 [default] No Virtualbox Guest Additions installation found.
-
 ```
+
+<br>
+
+やはりインストールがされていません。
 
 <br>
 
@@ -175,7 +178,7 @@ $ sudo yum -y install kernel
 ```
 $ exit;
 ```
-Vagrantの再起動を行います。
+ゲストOSからログアウトし、Vagrantの再起動を行います。
 ```
 $ vagrant reload --provision
 ```
@@ -189,12 +192,12 @@ $ vagrant vbguest --status
 <br>
 
 ### ゲストOSが起動されるとログインが可能になります。
-sshコマンドで確認。
+sshコマンドでログイン。
 ```
 $ vagrant ssh
 [vagrant@localhost ~]$  
 ```
-ログインに成功しました。
+無事ログインに成功しました。
 
 <br>
 
@@ -207,8 +210,10 @@ $ vagrant ssh
 $ vagrant sandbox status
 [default] Sandbox mode is off
 ```
-Sandboxがoffになっていては使えないのでonで有効化しましょう
+
 <br>
+
+Sandboxがoffになっていては使えないのでonで有効化しましょう
 ```
 $ vagrant sandbox on
 ```
@@ -222,6 +227,9 @@ $ vagrant sandbox status
 ```
 $ vagrant sandbox off
 ```
+
+<br>
+
 現時点での環境構築を保存し、いつでも元に戻せるようにサンドボックスをコミットします。
 ```
 $ vagrant sandbox commit
@@ -230,11 +238,10 @@ $ vagrant sandbox commit
 0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
 ```
 これでコミット完了です。
-```
-vagrant sandbox rollback
-```
-上のコマンドを使えばいつでも元の状態に戻すことができます。
 
+<br>
+
+コミット後は`vagrant sandbox rollback`を使えばいつでもコミット時の状態に戻すことができます。
 
 <br>
 
@@ -245,6 +252,10 @@ vagrant sandbox rollback
 [vagrant@localhost ~]$ sudo yum -y groupinstall "development tools"
 ```
 
+<br>
+
+頻繁に使用するのは以下のコマンドです。
+
 #### sudo コマンド
 &emsp; rootユーザー（管理者）の権限を借りるコマンド
 
@@ -254,16 +265,20 @@ vagrant sandbox rollback
 #### groupinstall
 &emsp; まとめてパッケージのインストールを行うことができるコマンドです
 
+<br>
+
 ### PHPのインストール
 
+php本体 関連モジュールをインストールします。
 ```
 [vagrant@localhost ~]$ sudo yum -y install epel-release wget
 [vagrant@localhost ~]$ sudo wget http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 [vagrant@localhost ~]$ sudo rpm -Uvh remi-release-7.rpm
 [vagrant@localhost ~]$ sudo yum -y install --enablerepo=remi-php73 php php-pdo php-mysqlnd php-mbstring [vagrant@localhost ~]$ php-xml php-fpm php-common php-devel php-mysql unzip
 ```
-php本体 関連モジュールをインストールします。
+
 <br>
+
 コマンドを実行し、インストールができたか確認しましょう。
 ```
 [vagrant@localhost ~]$ php -v
@@ -271,7 +286,6 @@ PHP 7.3.26 (cli) (built: Jan  5 2021 10:36:07) ( NTS )
 Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.26, Copyright (c) 1998-2018 Zend Technologies
 ```
-<br>
 phpのインストールが完了しました。
 
 <br>
@@ -316,8 +330,8 @@ mysql  Ver 14.14 Distrib 5.7.33, for Linux (x86_64) using  EditLine wrapper
 [vagrant@localhost ~]$ sudo systemctl start mysqld
 [vagrant@localhost ~]$ mysql -u root -p
 ```
-デフォルトでrootにパスワードが設定されているため、MySQLにアクセスできません。
-一度パスワードを調べ、接続しパスワードの再設定が必要になります。
+デフォルトでrootにパスワードが設定されているため、MySQLにアクセスできません。  
+一度パスワードを調べ、接続しパスワードの再設定が必要になります。  
 
 ```
 [vagrant@localhost ~]$ sudo cat /var/log/mysqld.log | grep 'temporary password'
@@ -341,8 +355,10 @@ mysql > set password = "新たなpassword";
 datadir=/var/lib/mysql
 socket=/var/lib/mysql/mysql.sock
 #この1行を追記
-
 ```
+
+<br>
+
 編集後にMySQLの再起動を行います。
 ```
 [vagrant@localhost ~]$ sudo systemctl restart mysqld
@@ -378,6 +394,9 @@ Nginxのインストールを行います。
 nginx -v
 nginx version: nginx/1.19.6
 ```
+
+<br>
+
 確認のため、Nginxを起動します。
 ```
 [vagrant@localhost ~]$ sudo systemctl start nginx
@@ -390,7 +409,7 @@ nginx version: nginx/1.19.6
 
 <br>
 
-192.168.33.19へアクセスすると`Welcome to nginx!`の画面が表示されます。
+192.168.33.19へアクセスすると`Welcome to nginx!`の画面が表示されれば設定完了です。
 
 <br>
 
@@ -627,21 +646,18 @@ server {
 }
 ```
 
+<br>
+
+Nginxを起動します。
 ```
 [vagrant@localhost ~]$ sudo systemctl start nginx 
 ```
-Nginxを起動します。
 
 <br>
 
 起動後、以下コマンドで状態を確認できます。
 ```
-sudo systemctl status nginx
-```
-
-<br>
-
-```
+[vagrant@localhost ~]$ sudo systemctl status nginx
 ● nginx.service - nginx - high performance web server
    Loaded: loaded (/usr/lib/systemd/system/nginx.service; disabled; vendor preset: disabled)
    Active: active (running) since Tue 2021-02-09 08:46:57 UTC; 54min ago
@@ -675,7 +691,7 @@ Job for nginx.service failed because the control process exited with error code.
 nginx: [emerg] unexpected "}" in /etc/nginx/conf.d/default.conf:14
 nginx: configuration file /etc/nginx/nginx.conf test failed
 ```
-14行目に原因があるようです。
+エラー内容から`/etc/nginx/conf.d/default.conf:`14行目に原因があることがわかりました。
 ```
 try_files $uri $uri/ /index.php$is_args$args
 ```
@@ -691,11 +707,12 @@ try_files $uri $uri/ /index.php$is_args$args;
 
 ### Nginxでphpアプリケーションを動かすにはphp-fpmという拡張モジュールの設定が必要です。
 <br>
-Nginxはこのphp-fpmとセットで動作するためです。
+
+`Nginx`はこの**php-fpm**とセットで動作するためです。
 
 <br>
 
-php-fpmの設定ファイルを編集します。
+**php-fpm**の設定ファイルを編集します。
 
 ```
 [vagrant@localhost ~]$ sudo vi /etc/php-fpm.d/www.conf
@@ -746,7 +763,9 @@ Enforcing
 Permissive
 ```
 こちらで設定をPermissiveに設定することでアクセスが可能になります。
+
 <br>
+
 何度も起動時にコマンドでPermissiveにする必要があるので、設定ファイルの内容を書き換えましょう。
 ```
 [vagrant@localhost ~]$ sudo vi /etc/selinux/config
@@ -759,13 +778,15 @@ SELINUX=enforcing
 SELINUX=disabled
 ```
 
+<br>
+
 修正後は`exit`でホストOSへ戻り、Vagrantを再起動しましょう。
 
 `getenforce`コマンドで出力される値が、`disabled`に変更されているはずです。
 
 <br>
 
-192.168.33.19へアクセス
+192.168.33.19へアクセスできるはずです。
 
 <br>
 
@@ -797,8 +818,6 @@ drwxr-xr-x. 1 vagrant vagrant 128 Feb  5 16:32 logs
 <br>
 
 権限を確認します。
-
-<br>
 
 ```
 [vagrant@localhost laravel_test]$ ls -la  | grep storage && ls -la storage/ | grep logs && ls -la storage/logs/ | grep laravel.log
