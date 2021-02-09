@@ -717,9 +717,9 @@ drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 再びhttp://192.168.33.19へアクセスします。
 問題なくlaravelの画面が表示されます。
 
+<br>
 
 ### 参考記事
-<br>
 [Vagrantのおけるポートフォワーディングではまった](https://qiita.com/tiruka/items/e0a03cbd71b842fef57e)
 
 [vagrant コマンド（起動・再起動・シャットダウン等々）備忘録](https://qiita.com/htk_jp/items/929875eaa5afc71c25ed)
