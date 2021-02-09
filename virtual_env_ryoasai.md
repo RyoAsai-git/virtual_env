@@ -1,8 +1,3 @@
-<!-- 開発環境
-DB MySQL5.7
-WebSever Nginx
-PHP 7.3
-Laravel 6.0 -->
 # Vagrant + CentOS + Nginx + Laravel + PHP + MySQL環境構築
 
 | 使用技術    | バージョン    |
@@ -104,7 +99,7 @@ com.docke 46735 asairyo   98u  IPv6 0x1781a46d18b75b79      0t0  TCP *:http-alt 
 ```
 `kill 46735`を使用し、強制終了。
 <br>
-<!-- 参考記事 https://qiita.com/tiruka/items/e0a03cbd71b842fef57e -->
+
 ```
 $ vagrant upでゲストOSを起動
 [default] No Virtualbox Guest Additions installation found.
@@ -116,8 +111,6 @@ $ vagrant upでゲストOSを起動
 ```
 $ vagrant halt
 ```
-<!-- 参照https://qiita.com/htk_jp/items/929875eaa5afc71c25ed -->
-
 
 <br>
 
@@ -171,8 +164,6 @@ $ vagrant vbguest --status
 ```
 インストールが完了し、動作も問題ないようです。
 
-<!-- 参照 https://qiita.com/mao172/items/f1af5bedd0e9536169ae -->
-
 <br>
 
 ### ゲストOSが起動されるとログインが可能になります。
@@ -221,8 +212,7 @@ $ vagrant sandbox commit
 vagrant sandbox rollback
 ```
 上のコマンドを使えばいつでも元の状態に戻すことができます。
-    
-<!-- 参考https://qiita.com/sudachi808/items/09cbd3dd1f5c25c23ea -->
+
 
 <br>
 
@@ -243,16 +233,6 @@ vagrant sandbox rollback
 &emsp; まとめてパッケージのインストールを行うことができるコマンドです
 
 ### PHPのインストール
-<!-- 
-```
-[vagrant@localhost ~]$ sudo yum -y install epel-release wget
-[vagrant@localhost ~]$ sudo yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm
-[vagrant@localhost ~]$ sudo yum update -y
-[vagrant@localhost ~]$ sudo yum install -y --enablerepo=remi,remi-php73 php php-zip php-devel [vagrant@localhost ~]$ php-mbstring php-pdo php-xml php-bcmath php-fpm php-mysql php-mysqlnd php-common
-``` -->
-<!-- php-pdo php-mysqlnd php-mbstring php-xml php-fpm php-common php-devel php-mysql -->
-<!-- php -m | grep -e openssl -e PDO -e mbstring -e tokenizer -e ^xml$ -e ctype -e json -e bcmath -->
-
 
 ```
 [vagrant@localhost ~]$ sudo yum -y install epel-release wget
@@ -271,8 +251,6 @@ Zend Engine v3.3.26, Copyright (c) 1998-2018 Zend Technologies
 ```
 <br>
 phpのインストールが完了しました。
-<br>
-<!-- 参考 https://qiita.com/okdyy75/items/d3492e4ea7136d3b6ffc -->
 
 <br>
 
@@ -470,8 +448,6 @@ public function boot()
 ```
 この状態でマイグレーション実行すると正常に動作が完了します。
 
-<!-- 参考　https://qiita.com/beer_geek/items/6e4264db142745ea666f -->
-
 <br>
 
 ## laravel authの作成
@@ -497,22 +473,10 @@ Authentication scaffolding generated successfully.
 
 `npm install`と`npm run dev`を行うよう書かれているので実行します。
 
-<!-- 今回はfontawesomeのインストールも行います。
-npm install --save-dev @fortawesome/fontawesome-free -->
 
 ```
 npm install
 ```
-
-<!-- ```
-composer require laravel/ui "^1.0" --dev
-```
-```
-php artisan ui vue --auth
-```
-```
-Please run "npm install && npm run dev" to compile your fresh scaffolding.
-``` -->
 
 <br>
 
@@ -540,24 +504,6 @@ npm audit
 npm install --save-dev axios@0.21.1
 ```
 
-<!-- /Users/asairyo/Desktop/virtual_env_manual/laravel_test/resources/sass/app.scss
-に以下を追記
-// Fonts
-@import url('https://fonts.googleapis.com/css?family=Nunito');
-
-// Variables
-@import 'variables';
-
-$fa-font-path: "../webfonts"; //追記
-
-// Bootstrap
-@import '~bootstrap/scss/bootstrap';
-
-@import "~@fortawesome/fontawesome-free/scss/fontawesome"; //追記
-@import '~@fortawesome/fontawesome-free/scss/solid'; //追記
-@import '~@fortawesome/fontawesome-free/scss/regular'; //追記
-@import '~@fortawesome/fontawesome-free/scss/brands'; //追記 -->
-
 ```
 npm run dev
 ```
@@ -569,7 +515,6 @@ npm run dev
 ```
 npm install && nup run dev
 ```
-<!-- 参照 https://www.techpit.jp/courses/42/curriculums/45/sections/362/parts/1144 -->
 
     
 <br>
@@ -704,11 +649,6 @@ group = apache
 ```
 group = nginx
 ```
-<!-- ```
-[vagrant@localhost ~]$ sudo systemctl start nginx
-[vagrant@localhost ~]$ sudo systemctl restart nginx
-[vagrant@localhost ~]$ sudo systemctl start php-fpm
-``` -->
 
 
 nginxとphp-fpmを再起動しましょう
@@ -778,7 +718,8 @@ drwxrwxrwx. 1 vagrant vagrant 128 Feb  5 16:32 logs
 問題なくlaravelの画面が表示されます。
 
 
-参考記事
+### 参考記事
+<br>
 [Vagrantのおけるポートフォワーディングではまった](https://qiita.com/tiruka/items/e0a03cbd71b842fef57e)
 
 [vagrant コマンド（起動・再起動・シャットダウン等々）備忘録](https://qiita.com/htk_jp/items/929875eaa5afc71c25ed)
