@@ -298,9 +298,9 @@ phpのインストールが完了しました。
 [vagrant@localhost ~]$ php composer-setup.php
 [vagrant@localhost ~]$ php -r "unlink('composer-setup.php');"
 [vagrant@localhost ~]$ sudo mv composer.phar /usr/local/bin/composer
+
+```console
 [vagrant@localhost ~]$ composer -v
-```
-```
     ______
     / ____/___  ____ ___  ____  ____  ________  _____
     / /   / __ \/ __ `__ \/ __ \/ __ \/ ___/ _ \/ ___/
